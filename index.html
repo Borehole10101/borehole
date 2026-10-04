@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOREHOLE</title>
+<meta name="description" content="Borehole: co-op horror for 1 to 4 players. Lower your friends into the hole. Bring back what you find. Feed the thing upstairs. Nobody lasts.">
+<meta property="og:title" content="BOREHOLE">
+<meta property="og:description" content="Co-op horror for 1 to 4 players. Nobody lasts.">
+<meta property="og:image" content="assets/cover.jpg">
+<link rel="icon" href="assets/icon.png">
+<script src="config.js"></script>
+<style>
+  @font-face { font-family: "VT323"; src: url("assets/fonts/VT323-Regular.ttf") format("truetype"); font-display: swap; }
+  :root {
+    --bg: #070707; --ink: #d9ccb3; --dim: #7d7466; --gold: #edd873; --red: #e0201a; --rust: #5a2a1a;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "VT323", "Courier New", monospace; font-size: 22px; line-height: 1.35;
+    overflow-x: hidden;
+  }
+  /* Film grain and scanlines over everything. */
+  body::before, body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+  body::before {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.5'/></svg>");
+    opacity: 0.09; animation: grain 0.6s steps(3) infinite;
+  }
+  body::after { background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.25) 2px 3px); }
+  @keyframes grain { 0% { transform: translate(0,0); } 33% { transform: translate(-6px,4px); } 66% { transform: translate(5px,-3px); } }
+
+  a { color: var(--gold); }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 16px; }
+
+  /* --- the top: the Warden in the dark, the title flickering --- */
+  .hero { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; }
+  .hero::before {
+    content: ""; position: absolute; inset: -5%; background: url("assets/hero.jpg") center / cover no-repeat;
+    filter: brightness(0.55) contrast(1.15); image-rendering: pixelated; animation: breathe 9s ease-in-out infinite;
+  }
+  .hero::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 20%, rgba(0,0,0,0.85) 75%); }
+  @keyframes breathe { 50% { transform: scale(1.04); } }
+  .hero .inner { position: relative; z-index: 2; }
+  h1 {
+    font-size: clamp(72px, 16vw, 190px); margin: 0; letter-spacing: 0.06em; color: var(--gold);
+    text-shadow: 0 0 18px rgba(237,216,115,0.25); animation: flicker 6s infinite;
+  }
+  @keyframes flicker {
+    0%, 19%, 22%, 62%, 64%, 100% { opacity: 1; }
+    20%, 21%, 63% { opacity: 0.25; }
+  }
+  .tag { font-size: clamp(22px, 3.2vw, 30px); color: var(--ink); margin: 0 0 32px; }
+  .tag b { color: var(--red); font-weight: normal; }
+  .scroll { color: var(--dim); font-size: 20px; animation: sink 2.4s ease-in-out infinite; display: inline-block; margin-top: 30px; }
+  @keyframes sink { 50% { transform: translateY(8px); opacity: 0.5; } }
+
+  /* --- the download button --- */
+  .btn {
+    display: inline-block; font-family: inherit; font-size: 34px; padding: 14px 42px; cursor: pointer;
+    background: transparent; color: var(--gold); border: 2px solid var(--gold); letter-spacing: 0.15em;
+    transition: background 0.15s, color 0.15s;
+  }
+  .btn:hover { background: var(--gold); color: #000; }
+  .btn.sealed { color: var(--red); border-color: var(--red); }
+  .btn.sealed:hover { background: var(--red); color: #000; }
+  .note { color: var(--dim); font-size: 19px; margin-top: 10px; min-height: 1.4em; }
+  .note.warn { color: var(--red); animation: shake 0.35s; }
+  @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+  /* --- sections --- */
+  section { padding: 90px 0; }
+  h2 { font-size: 46px; color: var(--gold); margin: 0 0 18px; letter-spacing: 0.08em; font-weight: normal; }
+  h2 span { color: var(--dim); font-size: 26px; margin-left: 10px; }
+  p { margin: 0 0 14px; max-width: 760px; }
+  .red { color: var(--red); }
+
+  video, .shots img { width: 100%; display: block; border: 1px solid #222; image-rendering: pixelated; background: #000; }
+  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .shots img { filter: brightness(0.85); transition: filter 0.3s, transform 0.3s; }
+  .shots img:hover { filter: brightness(1.15); transform: scale(1.015); }
+
+  .creatures { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; }
+  .creature { border-left: 2px solid var(--rust); padding: 4px 0 4px 14px; }
+  .creature b { color: var(--gold); font-weight: normal; font-size: 26px; display: block; }
+  .creature i { color: var(--red); font-style: normal; }
+
+  ul.feat { list-style: none; padding: 0; margin: 0; columns: 2 300px; }
+  ul.feat li { padding: 4px 0 4px 22px; position: relative; break-inside: avoid; }
+  ul.feat li::before { content: "\25B8"; position: absolute; left: 0; color: var(--red); }
+
+  .specs { color: var(--dim); }
+  footer { padding: 50px 0 90px; color: var(--dim); font-size: 18px; text-align: center; }
+
+  /* --- the depth meter: how far down the page you have gone --- */
+  .depth { position: fixed; right: 16px; top: 50%; transform: translateY(-50%); z-index: 40; text-align: right; color: var(--dim); font-size: 18px; }
+  .depth .bar { width: 4px; height: 160px; background: #1a1a1a; margin: 6px 0 6px auto; position: relative; }
+  .depth .fill { position: absolute; top: 0; left: 0; right: 0; background: var(--red); height: 0; }
+  .depth .m { color: var(--gold); font-size: 22px; }
+  @media (max-width: 700px) { .depth { display: none; } body { font-size: 20px; } section { padding: 60px 0; } }
+
+  /* --- a face in the dark, now and then --- */
+  .eyes { position: fixed; width: 34px; height: 8px; z-index: 30; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
+  .eyes::before, .eyes::after { content: ""; position: absolute; top: 0; width: 8px; height: 8px; background: var(--red); box-shadow: 0 0 10px var(--red); }
+  .eyes::before { left: 0; } .eyes::after { right: 0; }
+
+  .fade { opacity: 0; transform: translateY(24px); transition: opacity 0.9s, transform 0.9s; }
+  .fade.seen { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<div class="depth" aria-hidden="true">DEPTH<div class="bar"><div class="fill" id="fill"></div></div><span class="m" id="metres">0 M</span></div>
+<div class="eyes" id="eyes" aria-hidden="true"></div>
+
+<header class="hero">
+  <div class="inner wrap">
+    <h1>BOREHOLE</h1>
+    <p class="tag">Lower your friends into the hole. Bring back what you find.<br>Feed the thing upstairs. <b>Nobody lasts.</b></p>
+    <button class="btn" id="download">DOWNLOAD</button>
+    <div class="note" id="note"></div>
+    <div><a class="scroll" href="#trailer">&#9660; GO DOWN &#9660;</a></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="trailer" class="fade">
+    <h2>THE TRAILER</h2>
+    <video controls preload="none" poster="assets/trailer_poster.jpg" src="assets/trailer.mp4"></video>
+  </section>
+
+  <section class="fade">
+    <h2>THE JOB <span>1 - 4 PLAYERS</span></h2>
+    <p>Your crew works a borehole: one rope, one winch, and a hole that goes far deeper than anyone should go. One of you runs the winch. The rest clip on and are lowered into the dark: past an old mine, a flooded bunker, a place that was old before anyone dug down to it, and something at the bottom that is not stone at all.</p>
+    <p>Bring back whatever you find and feed it to <span class="red">the Feeder</span>. It wants more every day. If it is not fed by the end of the shift, it eats the crew.</p>
+  </section>
+
+  <section class="fade">
+    <h2>WHAT IS DOWN THERE</h2>
+    <div class="creatures">
+      <div class="creature"><b>THE WATCHER</b><i>Do not look at it.</i></div>
+      <div class="creature"><b>THE WARDEN</b>Walks the bunker with a lantern. <i>Stay out of the light.</i></div>
+      <div class="creature"><b>THE LURKER</b><i>Do not look away from it.</i></div>
+      <div class="creature"><b>THE LISTENER</b>Blind. Hears everything. <i>Be quiet.</i></div>
+      <div class="creature"><b>THE CLIMBER</b>It comes up the rope. <i>Cut it, or don't.</i></div>
+      <div class="creature"><b>THE PHONE</b>It rings at the top. <i>It wants things.</i></div>
+    </div>
+  </section>
+
+  <section class="fade">
+    <h2>FROM BELOW</h2>
+    <div class="shots">
+      <img src="assets/shots/02_warden.jpg" alt="The Warden in a bunker corridor" loading="lazy">
+      <img src="assets/shots/05_listener.jpg" alt="The Listener in the dark" loading="lazy">
+      <img src="assets/shots/06_ossuary.jpg" alt="A wall of skulls in the catacombs" loading="lazy">
+      <img src="assets/shots/04_lurker.jpg" alt="The Lurker, a stone statue" loading="lazy">
+      <img src="assets/shots/01_pithead.jpg" alt="The pit head and the winch" loading="lazy">
+      <img src="assets/shots/10_shaft.jpg" alt="Looking down the shaft" loading="lazy">
+    </div>
+  </section>
+
+  <section class="fade">
+    <h2>WHAT YOU DO</h2>
+    <ul class="feat">
+      <li>Co-op for 1 to 4, or alone</li>
+      <li>Proximity voice chat</li>
+      <li>Tug the rope to signal the winch</li>
+      <li>Four levels, each with a puzzle and a vault</li>
+      <li>Endless upgrades between shifts</li>
+      <li>Every day the hole gets worse</li>
+      <li>Keyboard and mouse, or a controller</li>
+      <li>How many days can your crew last?</li>
+    </ul>
+  </section>
+
+  <section class="fade" id="get">
+    <h2>GO DOWN</h2>
+    <p class="specs">Windows 10 / 11, 64-bit &middot; DirectX 11 graphics card &middot; 4 GB RAM &middot; <span id="meta"></span></p>
+    <p class="specs">Download and run <b>Borehole_Setup</b>. It puts Borehole in your Start menu and on your desktop. If Windows says it protected your PC, click <i>More info</i>, then <i>Run anyway</i>.</p>
+    <button class="btn" id="download2">DOWNLOAD</button>
+    <div class="note" id="note2"></div>
+  </section>
+</main>
+
+<footer>
+  BOREHOLE &middot; made by Oscar &middot; 2026<br>
+  Font: VT323 by Peter Hull (SIL Open Font License)
+</footer>
+
+<script>
+(function () {
+  var cfg = window.BOREHOLE || { downloadOpen: false, downloadUrl: "" };
+  var open = cfg.downloadOpen && cfg.downloadUrl;
+  var refusals = [
+    "THE HOLE IS SEALED. NOT YET.",
+    "SOMETHING IS STILL CLIMBING. WAIT.",
+    "THE FEEDER IS NOT HUNGRY YET.",
+    "THE ROPE IS NOT READY. COME BACK.",
+    "YOU ARE NOT ON THE LIST.",
+    "STOP KNOCKING."
+  ];
+  var tries = 0;
+  document.getElementById("meta").textContent = "Version " + (cfg.version || "") + " · " + (cfg.size || "");
+
+  function wire(buttonId, noteId) {
+    var btn = document.getElementById(buttonId), note = document.getElementById(noteId);
+    if (open) {
+      btn.textContent = "DOWNLOAD";
+      btn.addEventListener("click", function () { window.location.href = cfg.downloadUrl; note.textContent = "GOOD LUCK DOWN THERE."; });
+    } else {
+      btn.textContent = "SEALED";
+      btn.classList.add("sealed");
+      note.textContent = "Not open yet.";
+      btn.addEventListener("click", function () {
+        note.textContent = refusals[tries % refusals.length];
+        tries++;
+        note.classList.remove("warn"); void note.offsetWidth; note.classList.add("warn");
+        if (tries === 6) peek(true);
+      });
+    }
+  }
+  wire("download", "note");
+  wire("download2", "note2");
+
+  // The depth meter: the page is 56 metres deep, like the hole.
+  var fill = document.getElementById("fill"), metres = document.getElementById("metres");
+  function depth() {
+    var max = document.documentElement.scrollHeight - innerHeight;
+    var f = max > 0 ? Math.min(1, scrollY / max) : 0;
+    fill.style.height = (f * 100) + "%";
+    metres.textContent = Math.round(f * 56) + " M";
+  }
+  addEventListener("scroll", depth, { passive: true }); depth();
+
+  // Sections rise out of the dark as they come into view.
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) e.target.classList.add("seen"); }); }, { threshold: 0.12 });
+  document.querySelectorAll(".fade").forEach(function (el) { io.observe(el); });
+
+  // Now and then, red eyes open somewhere at the edge of the screen, and shut.
+  var eyes = document.getElementById("eyes");
+  function peek(now) {
+    eyes.style.left = (Math.random() < 0.5 ? 10 + Math.random() * 60 : innerWidth - 110 + Math.random() * 60) + "px";
+    eyes.style.top = (80 + Math.random() * (innerHeight - 160)) + "px";
+    eyes.style.opacity = "1";
+    setTimeout(function () { eyes.style.opacity = "0"; }, now ? 1400 : 700);
+  }
+  (function loop() { setTimeout(function () { if (scrollY > 200) peek(false); loop(); }, 9000 + Math.random() * 14000); })();
+})();
+</script>
+</body>
+</html>
