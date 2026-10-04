@@ -7,8 +7,9 @@
 //  downloadUrl: the link to the game zip (see WEBSITE_GUIDE.md, step 4).
 // ============================================================
 window.BOREHOLE = {
-  downloadOpen: true,
-  downloadUrl: "https://github.com/Borehole10101/borehole/releases/download/v0.9.0/Borehole_Setup_0.9.0.exe",
+  downloadOpen: false,
+  maintenance: true,   // true -> the button says MAINTENANCE instead of SEALED
+  downloadUrl: "",
   version: "0.9.0",
   size: "30 MB",
 };

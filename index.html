@@ -210,9 +210,10 @@
       btn.textContent = "DOWNLOAD";
       btn.addEventListener("click", function () { window.location.href = cfg.downloadUrl; note.textContent = "GOOD LUCK DOWN THERE."; });
     } else {
-      btn.textContent = "SEALED";
+      btn.textContent = cfg.maintenance ? "MAINTENANCE" : "SEALED";
       btn.classList.add("sealed");
-      note.textContent = "Not open yet.";
+      note.textContent = cfg.maintenance ? "The hole is being dug deeper. Back soon." : "Not open yet.";
+      if (cfg.maintenance) refusals = ["THE HOLE IS BEING DUG DEEPER.", "SOMETHING NEW IS DOWN THERE. WAIT.", "THE CREW IS REPAIRING THE WINCH.", "BACK SOON. DON'T COME DOWN ALONE.", "STILL DIGGING.", "STOP KNOCKING."];
       btn.addEventListener("click", function () {
         note.textContent = refusals[tries % refusals.length];
         tries++;
