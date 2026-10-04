@@ -1,7 +1,7 @@
 // ============================================================
 //  THE DOWNLOAD SWITCH. This is the only file you need to touch.
 //
-//  downloadOpen: true  ->  the button says SEALED and nobody can download.
+//  downloadOpen: false  ->  the button says SEALED and nobody can download.
 //  downloadOpen: true   ->  the button downloads the game from downloadUrl.
 //
 //  downloadUrl: the link to the game zip (see WEBSITE_GUIDE.md, step 4).
