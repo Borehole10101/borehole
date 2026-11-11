@@ -1,4 +1,4 @@
 {
-  "maintenance": false,
-  "message": "STATION 5 IS UNDER MAINTENANCE. BACK SOON."
+  "maintenance": true,
+  "message": "HI,THIS IS A TEST TO SEE IF THIS WORKS PLEASE STAND BY WHILE WE GET THIS SMALL PROBLEM FIXED!"
 }
